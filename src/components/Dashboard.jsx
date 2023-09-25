@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import Result from "./Result";
 
-function Dashboard() {
+function Dashboard(props) {
+  const { setHistory, history } = props;
   const [apiCallOptionsToggle, setApiCallOptionsToggle] = useState(false);
   const [userInput, setUserInput] = useState("");
-  const [method, setMethod] = useState("POST");
+  const [body, setBody] = useState(null);
+  const [method, setMethod] = useState("GET");
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,23 +16,41 @@ function Dashboard() {
     setMethod(textContent);
   };
 
-  const handleSubmit = async (method = "GET", url) => {
+  const handleSubmit = async (method = "GET", url, body) => {
     const urlRegex =
       /^(https?:\/\/)?([\w\-]+(\.[\w\-]+)+\/?|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/\S*)?$/;
     if (!urlRegex.test(url)) {
       console.log("Valid URL");
       return;
     }
+
+    const requestOptions = {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: body && body,
+    };
+
     try {
       setIsLoading(true);
-      const res = await fetch(url);
-      const data = await res.json();
+      let data;
+      if (method === "GET") {
+        const res = await fetch(url);
+        data = await res.json();
+      } else {
+        const res = await fetch(url, requestOptions);
+        data = await res.json();
+      }
       setResponse(data);
       setIsLoading(false);
+      setHistory([...history, { method: method, url: url }]);
+      setError(null);
     } catch (error) {
       setIsLoading(false);
-      setError("Check your URL!");
       console.log(error);
+      setError(error.message);
+      setError(error);
     }
   };
 
@@ -83,14 +103,14 @@ function Dashboard() {
               </ul>
             </div>
             <input
-              className="w-3/5 bg-transparent px-2 outline-none"
+              className="w-full bg-transparent px-2 outline-none"
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
             />
           </div>
           <button
-            onClick={() => handleSubmit(method, userInput)}
+            onClick={() => handleSubmit(method, userInput, body)}
             className="bg-[#00ADB5] px-6 py-2 rounded-md"
           >
             {isLoading ? (
@@ -118,8 +138,26 @@ function Dashboard() {
             )}
           </button>
         </div>
-        <div className="h-full bg-[#393e464d] rounded-xl p-4 m-2 overflow-auto">
-          <Result error={error} response={response} />
+        <div className="bg-[#393e464d] rounded-xl p-4 m-2">
+          <textarea
+            className="w-full bg-transparent outline-none px-2 py-2"
+            value={body}
+            onChange={(e) => {
+              //   console.log(JSON.parse(e.target.value));
+              setBody(e.target.value);
+            }}
+            name="body"
+            cols="30"
+            rows="5"
+            placeholder={` Body
+            {
+                name: "name",
+                age: 56
+            }`}
+          ></textarea>
+        </div>
+        <div className="h-full bg-[#393e464d] rounded-xl p-4 mx-2 mb-2 overflow-auto">
+          <Result response={response} />
         </div>
       </div>
     </>

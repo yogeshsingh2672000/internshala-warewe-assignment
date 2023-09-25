@@ -8,7 +8,12 @@ function Result(props) {
       {!response ? (
         "Try making a request: GET, POST, PUT, DELETE"
       ) : (
-        <JsonViewer className="text-[15px]" value={response} theme={"dark"} />
+        <JsonViewer
+          style={{ backgroundColor: "transparent" }}
+          className="text-[15px]"
+          value={response}
+          theme={"dark"}
+        />
       )}
     </>
   );

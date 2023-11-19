@@ -1,6 +1,6 @@
 ### GitHub Links
 
-- [Hosted Link](https://internshala-warewe-assignment.vercel.app/)
+- [Hosted Link](https://postman-clone-ochre.vercel.app//)
 
 ## Installation
 
